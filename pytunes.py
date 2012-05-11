@@ -257,14 +257,22 @@ class Album(object):
             self._is_compilation_cache = len(unique_artists) > 1
         return self._is_compilation_cache
 
+    @staticmethod
     def group_tracks_into_albums(tracks):
         """Groups some tracks into Albums.
 
         A track is considered part of an Album when it has a track number and
         year, and when the album artist (or artist if there is no album artist),
-        year, album, and file directory are identical.
+        year, album, and the files are in the same directory, with no other
+        tracks in the same directory.
+
+        @return: Yields the grouped albums.
+        @rtype: generator(Album)
         """
-        albums = {}
+        albums_by_key = {}
+        albums_by_directory = {}
+
+        # Identify unique, potential albums.
         for track in tracks:
             if track.album_artist:
                 artist = track.album_artist
@@ -276,18 +284,25 @@ class Album(object):
                 continue
 
             location = track.location.replace('file://localhost', '')
-            directory = os.path.split(source_dir)[0]
+            directory = os.path.split(location)[0]
 
             album_key = '%s-%s-%s-%s' % (
                     artist, track.year, track.album, directory)
 
-            album = albums.get(album_key)
+            album = albums_by_key.get(album_key)
             if not album:
                 album = Album(artist, track.year, track.album)
-                albums[album_key] = album
+                albums_by_key[album_key] = album
+                albums_by_directory.setdefault(directory, [])
+                albums_by_directory[directory].append(album)
 
             album.tracks.append(track)
-        return albums.values()
+
+        # Only consider those albums where there are no other tracks in the same
+        # directory. Otherwise single tracks might be treated as albums.
+        for directory, albums in albums_by_directory.iteritems():
+            if len(albums) == 1:
+                yield albums[0]
 
     def __unicode__(self):
         return '%s - %s - %s - Rating: %0.2f - Rating completeness: %0.2f' % (
