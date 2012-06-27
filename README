@@ -1,1 +1,4 @@
 A pythonic interface to the iTunes library.
+
+Comes with some an analysis library on top of it (analysis.py), a tool to run statistics
+over your library (stat.py) and one to clean up your library (cleanup.py).
