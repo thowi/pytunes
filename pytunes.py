@@ -133,6 +133,7 @@ class Track(object):
     artist = None
     artwork_count = None
     bit_rate = None
+    composer = None
     date_added = None
     date_modified = None
     file_folder_count = None
@@ -165,6 +166,7 @@ class Track(object):
         track.artist = item.get('Artist')
         track.artwork_count = item.get('Artwork Count')
         track.bit_rate = item.get('Bit Rate')
+        track.composer = item.get('Composer')
         track.date_added = item.get('Date Added')
         track.date_modified = item.get('Date Modified')
         track.file_folder_count = item.get('File Folder Count')
@@ -190,10 +192,6 @@ class Track(object):
         track.year = item.get('Year')
         return track
 
-    @property
-    def items(self):
-        for item_id in self._item_ids:
-            yield self._all_tracks[item_id]
 
     def __unicode__(self):
         return '''Track(id='%s', artist='%s', name='%s')''' % (
