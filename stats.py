@@ -2,6 +2,7 @@
 
 """A tool to run stats over your iTunes library."""
 
+import collections
 import logging
 import os
 import os.path
@@ -44,24 +45,6 @@ def print_worst_albums(albums, n=50):
     print
 
 
-def print_crappy_singles(all_tracks, albums, min_rating=80):
-    print 'Crappy singles:'
-    crappy_singles = analysis.find_crappy_single_tracks(all_tracks, albums, min_rating)
-    for track in crappy_singles:
-        location = track.location.replace('file://localhost', '')
-        print '%s - %s - %0.2f - %s' % (
-                track.artist, track.name, track.rating, location)
-    print
-
-
-def print_crappy_albums(albums, min_good_tracks=4, min_rating=80):
-    print 'Crappy albums:'
-    crappy_albums = analysis.find_crappy_albums(albums, min_good_tracks, min_rating)
-    for album in crappy_albums:
-        print unicode(album).encode('utf-8')
-    print
-
-
 def print_duplicates(tracks, tolerated_time_difference=10):
     print 'Duplicates:'
     duplicates = analysis.find_duplicates(tracks, tolerated_time_difference)
@@ -71,31 +54,48 @@ def print_duplicates(tracks, tolerated_time_difference=10):
         print unicode(track).encode('utf-8')
 
 
+def print_favorite_bands(songs, n=50):
+    print '%d favorite bands (by number of tracks in the library):' % n
+    counter = collections.Counter()
+    counter.update([t.artist for t in songs])
+    for artist, count in counter.most_common(n):
+        print '%s - %d' % (unicode(artist).encode('utf-8'), count)
+    print
+
+
+def print_best_bands(songs, min_rating, n=50):
+    print '%d best bands (by number of highly rated tracks):' % n
+    good_tracks = filter(lambda t: t.rating >= min_rating, songs)
+    counter = collections.Counter()
+    counter.update([t.artist for t in good_tracks])
+    for artist, count in counter.most_common(n):
+        print '%s - %d' % (unicode(artist).encode('utf-8'), count)
+    print
+
+
 def main():
     logging.basicConfig(format=LOG_FORMAT, level=logging.INFO)
 
     logger.info('Opening iTunes library...')
     lib = pytunes.Library()
     logger.info('Loading all tracks...')
-    all_tracks = list(lib.tracks)
-    albums = list(pytunes.Album.group_tracks_into_albums(all_tracks))
+    songs = filter(lambda t: not t.podcast, lib.tracks)
+    albums = list(pytunes.Album.group_tracks_into_albums(songs))
+    albums = filter(lambda a: len(a.tracks) > 7, albums)
+    htgt = filter(lambda a: a.album == 'Here Today Gone Tomorrow', albums)[0]
     dryrun = True
-    n = 20
+    n = 10
     min_rating = 80  # 4 stars.
     min_good_tracks = 4
     keep_good_tracks = True
     tolerated_time_difference = 10
 
-    #print_incompletely_rated_albums(albums)
-    #print_best_albums(albums, n)
-    #print_worst_albums(albums, n)
-    #print_crappy_singles(all_tracks, albums, min_rating)
-    #delete_crappy_singles(all_tracks, albums, min_rating, dryrun)
-    #print_crappy_albums(albums, min_good_tracks, min_rating)
-    #delete_crappy_albums(
-    #        albums, min_good_tracks, min_rating, keep_good_tracks, dryrun)
-    #delete_compilations(albums, min_rating, keep_good_tracks, dryrun)
-    #print_duplicates(all_tracks, tolerated_time_difference)
+    print_best_albums(albums, n)
+    print_best_bands(songs, min_rating, n)
+    print_favorite_bands(songs, n)
+    print_worst_albums(albums, n)
+    print_incompletely_rated_albums(albums)
+    print_duplicates(songs, tolerated_time_difference)
 
 
 if __name__ == '__main__':
