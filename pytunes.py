@@ -148,6 +148,7 @@ class Track(object):
     play_count = None
     play_date = None
     play_date_utc = None
+    podcast = None
     rating = None
     sample_rate = None
     size = None
@@ -183,6 +184,7 @@ class Track(object):
         track.play_count = item.get('Play Count')
         track.play_date = item.get('Play Date')
         track.play_date_utc = item.get('Play Date UTC')
+        track.podcast = item.get('Podcast')
         track.rating = item.get('Rating')
         track.sample_rate = item.get('Sample Rate')
         track.size = item.get('Size')
@@ -281,7 +283,7 @@ class Album(object):
                 not track.album):
                 continue
 
-            location = track.location.replace('file://localhost', '')
+            location = track.location.replace('file://', '')
             directory = os.path.split(location)[0]
 
             album_key = '%s-%s-%s-%s' % (
@@ -309,4 +311,3 @@ class Album(object):
 
     def __str__(self):
         return unicode(self).encode('utf-8')
-
