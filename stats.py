@@ -26,7 +26,7 @@ def print_incompletely_rated_albums(albums):
 
 
 def print_best_albums(albums, n=50):
-    print '%d best rated albums:' % n
+    print '%d best rated albums (by average rating):' % n
     completely_rated_albums = analysis.find_completely_rated_albums(albums)
     albums_sorted_by_rating = sorted(
             completely_rated_albums, key=lambda a: a.avg_rating)
@@ -36,7 +36,7 @@ def print_best_albums(albums, n=50):
 
 
 def print_worst_albums(albums, n=50):
-    print '%d worst rated albums:' % n
+    print '%d worst rated albums (by average rating):' % n
     completely_rated_albums = analysis.find_completely_rated_albums(albums)
     albums_sorted_by_rating = sorted(
             completely_rated_albums, key=lambda a: a.avg_rating)
