@@ -235,10 +235,11 @@ class Album(object):
         if self._avg_rating_cache is None:
             rated_tracks = filter(lambda t: t.rating, self.tracks)
             if len(rated_tracks):
-                self._avg_rating_cache = \
-                        sum(t.rating for t in rated_tracks) / len(rated_tracks)
+                self._avg_rating_cache = (
+                        float(sum(t.rating for t in rated_tracks))
+                        / len(rated_tracks))
             else:
-                self._avg_rating_cache = 0
+                self._avg_rating_cache = 0.0
         return self._avg_rating_cache
 
     @property
@@ -305,7 +306,7 @@ class Album(object):
                 yield albums[0]
 
     def __unicode__(self):
-        return '%s - %s - %s - Rating: %0.2f - Rating completeness: %0.2f' % (
+        return '%s - %s - %s - Average rating: %0.2f - Rating completeness: %0.2f' % (
                 self.artist, self.year, self.album, self.avg_rating,
                 self.rating_completeness)
 
